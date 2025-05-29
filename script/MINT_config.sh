@@ -44,7 +44,7 @@ GRAD_SCRIPT_PATH="${BASE_DIR}/mint/scripts/get_train_lora_grads.sh"
 # ---------- MINT coreset selection (step‑3) ----------
 MODEL_MINT="${JOB_NAME_WARM}"
 GRADIENT_PATH="${OUTPUT_PATH_GRAD}"
-RATIOS_LIST="0.05 0.07 0.1"
+RATIOS_LIST="0.05 0.1 0.15"
 PREHEAT_RATIO=0.3
 SAVE_DIR="${BASE_DIR}/output/coreset/${DIM}_${MODEL_MINT}"
 MINT_PYTHON_PATH="${BASE_DIR}/mint/coreset/run_MINT.py"
