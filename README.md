@@ -220,7 +220,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 We thank the open-source community for providing the foundational tools and datasets that made this work possible.
 
 This work builds upon and references the following projects:
-- **LESS** (Selecting Influential Data for Targeted Instruction Tuning): https://github.com/princeton-nlp/LESS
-- **CRAIG** (Coresets for Accelerating Incremental Gradient): https://github.com/baharanm/craig
+- **LESS** (LESS: Selecting Influential Data for Targeted Instruction Tuning): https://github.com/princeton-nlp/LESS
+- **CRAIG** (Data-efficient Training of Machine Learning Models): https://github.com/baharanm/craig
 
 We appreciate the authors of these projects for making their code and methodologies publicly available.
