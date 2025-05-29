@@ -13,7 +13,7 @@ The key insight is that different instruction examples contribute differently to
 ### ✨ Key Features
 
 - **Theoretical Foundation**: Decomposes instruction tuning loss into knowledge-related and instruction-following capabilities with theoretical guarantees
-- **Dual-Constraint Optimization**: Balances knowledge preservation and instruction-following enhancement through a principled trade-off mechanism
+- **Dual-Constraint Optimization**: Balances knowledge-related capability and instruction-following capability through a principled trade-off mechanism
 - **Efficient Selection**: Uses submodular optimization with bounded approximation error, reducing the dual-constraint problem to a tractable single-constraint formulation
 - **General Applicability**: Works across different model architectures and datasets
 
