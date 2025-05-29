@@ -35,7 +35,7 @@ def _pairwise_euclidean(mat: torch.Tensor, chunk: int | None = None) -> np.ndarr
     return dmat.numpy()
 
 
-from lazy_greedy import FacilityLocation  # 原仓库里的实现
+from lazy_greedy import FacilityLocation
 
 
 def _heappush_max(h, it):
@@ -92,7 +92,6 @@ def _select_subset(S: np.ndarray, k: int, desc="", verbose=True):
     ) as pbar:
         F = FacilityLocation(S, V=V)
         subset, _ = _lazy_greedy_heap(F, V, k, pbar)
-    # 计算簇权重
     w = np.zeros(len(subset), dtype=np.float32)
     assign = S[:, subset].argmax(axis=1)
     for j in assign:
@@ -169,7 +168,16 @@ def _get_args(argv=None):
         "--grad-dir", required=True, help="root containing pt/, ifl/, (opt) sft/"
     )
     ap.add_argument("--proj-dim", type=int, default=8192)
-    ap.add_argument("--subset-ratio", type=float, default=0.1, help="k / N")
+    # ap.add_argument("--subset-ratio", type=float, default=0.1, help="k / N")
+    ap.add_argument(
+        "--ratios",
+        type=float,
+        nargs="+",
+        default=[0.05, 0.1, 0.15],
+        metavar="R",
+        help="list of ratios (0<R<=1) for additional subset dumps; the maximum value determines the main subset size k/N",
+    )
+
     ap.add_argument("--save", required=True, help="output .npz base path")
 
     # mutually exclusive α / coef / auto
@@ -194,16 +202,24 @@ def main(argv=None):
     args = _get_args(argv)
     rng = np.random.default_rng(args.seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-
+    ratios_list = sorted(set(float(r) for r in args.ratios))
+    if not ratios_list:
+        raise ValueError("--ratios must contain at least one positive value")
+    subset_ratio = max(ratios_list)
+    print(f">>> Ratios for subsets: {ratios_list} (max={subset_ratio})")
+    if not 0 < subset_ratio <= 1:
+        raise ValueError("ratios must be in (0,1]")
     print("\n>>> Loading gradient projections & pairwise distances …")
     grads_pt = _load_grad_block(args.grad_dir, "pt", args.proj_dim, device)
     grads_ifl = _load_grad_block(args.grad_dir, "ifl", args.proj_dim, device)
+    grads_sft = _load_grad_block(args.grad_dir, "sft", args.proj_dim, device)
     d_pt = _pairwise_euclidean(grads_pt)
     d_ifl = _pairwise_euclidean(grads_ifl)
+    d_sft = _pairwise_euclidean(grads_sft)
     N = d_pt.shape[0]
-    k = max(1, int(round(args.subset_ratio * N)))
+    k = max(1, int(round(subset_ratio * N)))
     print(f"   dataset N={N}; final subset k={k}")
-    del grads_pt, grads_ifl
+    del grads_pt, grads_ifl, grads_sft
     torch.cuda.empty_cache() if torch.cuda.is_available() else None
 
     if args.coef:
@@ -211,7 +227,7 @@ def main(argv=None):
         coeffs = {"sft": sft_c, "pt": pt_c, "ifl": ifl_c}
         coeffs = {k: v for k, v in coeffs.items() if abs(v) > 1e-12}
         print(">>> Explicit-coef mode:", coeffs)
-        D_comb = d_pt * coeffs.get("pt", 0) + d_ifl * coeffs.get("ifl", 0)
+        D_comb = d_pt * coeffs.get("pt", 0) + d_ifl * coeffs.get("ifl", 0) + d_sft * coeffs.get("sft", 0)
         D_max = D_comb.max()
         S = (D_max - D_comb).astype(np.float32, copy=False)
         subset, weights = _select_subset(S, k)
@@ -231,7 +247,7 @@ def main(argv=None):
         pre_ids = rng.choice(N, size=n_pre, replace=False)
         d_pt_pre = d_pt[np.ix_(pre_ids, pre_ids)]
         d_ifl_pre = d_ifl[np.ix_(pre_ids, pre_ids)]
-        k_pre = max(1, int(round(args.subset_ratio * n_pre)))
+        k_pre = max(1, int(round(subset_ratio * n_pre)))
 
         alphas = _alpha_grid()
         e_pts, e_ifls = [], []
@@ -300,7 +316,7 @@ def main(argv=None):
     D_comb = d_pt * coeffs["pt"] + d_ifl * coeffs["ifl"]
     S = (D_comb.max() - D_comb).astype(np.float32, copy=False)
     subset, weights = _select_subset(S, k)
-    _save_npz(S, subset, weights, args.save)
+    _save_npz(S, subset, weights, args.save,ratios=ratios_list)
     print(">>> Done.")
 
 

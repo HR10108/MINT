@@ -3,7 +3,7 @@ source ./MINT_config.sh
 python "${MINT_PYTHON_PATH}" \
     --grad-dir "${GRADIENT_PATH}" \
     --proj-dim "${DIM}" \
-    --subset-ratio "${SUBSET_RATIO}" \
+    --ratios ${RATIOS_LIST} \
     --preheat-ratio "${PREHEAT_RATIO}" \
     --save "${SAVE_DIR}" \
     --seed "${SEED}" \

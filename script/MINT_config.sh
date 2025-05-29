@@ -44,8 +44,8 @@ GRAD_SCRIPT_PATH="${BASE_DIR}/mint/scripts/get_train_lora_grads.sh"
 # ---------- MINT coreset selection (step‑3) ----------
 MODEL_MINT="${JOB_NAME_WARM}"
 GRADIENT_PATH="${OUTPUT_PATH_GRAD}"
-SUBSET_RATIO=0.15
-PREHEAT_RATIO=0.05
+RATIOS_LIST="0.05 0.07 0.1"
+PREHEAT_RATIO=0.3
 SAVE_DIR="${BASE_DIR}/output/coreset/${DIM}_${MODEL_MINT}"
 MINT_PYTHON_PATH="${BASE_DIR}/mint/coreset/run_MINT.py"
 # Uncomment to tune alpha
@@ -53,9 +53,10 @@ MINT_PYTHON_PATH="${BASE_DIR}/mint/coreset/run_MINT.py"
 # ALPHA_OPT="--alpha ${ALPHA}"
 
 # ---------- Final training on coreset (step‑4) ----------
-FINAL_JOB="gpt4-MINT-${SUBSET_RATIO}"
+TRAIN_RATIO=0.05
+FINAL_JOB="gpt4-MINT-${TRAIN_RATIO}"
 JOB_NAME_FINAL="Llama3-8B-${FINAL_JOB}"
-CORESET_FILE="${SAVE_DIR}_${SUBSET_RATIO}.npz"
+CORESET_FILE="${SAVE_DIR}_${TRAIN_RATIO}.npz"
 OUTPUT_PATH_FINAL="${BASE_DIR}/output/model/${JOB_NAME_FINAL}"
 FINAL_SCRIPT_PATH="${BASE_DIR}/mint/scripts/lora_train_coreset.sh"
 
