@@ -22,7 +22,7 @@ from transformers import (
     set_seed,
 )
 
-from mint.data_selection.get_training_dataset import get_training_dataset
+from mint.get_grads.get_training_dataset import get_training_dataset
 from mint.train.data_arguments import DataArguments, get_data_statistics
 from mint.train.model_arguments import ModelArguments, add_padding_to_tokenizer
 from mint.train.training_arguments import TrainingArguments
@@ -130,7 +130,7 @@ def main():
 
     analysis_dataset = None
     if training_args.analysis_mode:
-        from mint.data_selection.get_validation_dataset import get_dataset
+        from mint.get_grads.get_validation_dataset import get_dataset
 
         analysis_dataset = get_dataset(
             training_args.analysis_dataset,

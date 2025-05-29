@@ -12,7 +12,7 @@ if [[ ! -d $output_path ]]; then
     mkdir -p $output_path
 fi
 
-python3 -m mint.data_selection.get_info \
+python3 -m mint.get_grads.get_info \
 --train_file $train_file \
 --info_type $INFO_TYPE \
 --model_path $model \
